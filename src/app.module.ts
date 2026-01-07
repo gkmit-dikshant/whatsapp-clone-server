@@ -3,6 +3,7 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     DatabaseModule,
     UsersModule,
+    ChatsModule,
   ],
   controllers: [],
   providers: [],
