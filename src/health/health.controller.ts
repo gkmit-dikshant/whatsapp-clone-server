@@ -13,7 +13,7 @@ export class HealthController {
   ) {}
   @Get()
   @HealthCheck()
-  async heck() {
+  async check() {
     const d = await this.db.pingCheck('database');
     return {
       currtime: Date(),
