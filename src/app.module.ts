@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
+import { MessageMediaModule } from './message-media/message-media.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { MessagesModule } from './messages/messages.module';
     UsersModule,
     ChatsModule,
     MessagesModule,
+    MessageMediaModule,
   ],
   controllers: [],
   providers: [],

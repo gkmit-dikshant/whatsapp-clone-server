@@ -1,4 +1,5 @@
 import { Chat } from 'src/chats/entities/chat.entity';
+import { MessageMedia } from 'src/message-media/entities/message-media-entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -6,6 +7,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,6 +33,10 @@ export class Message {
   // message <-- chat
   @ManyToOne(() => Chat, (chat) => chat.messages)
   chat: Chat;
+
+  // message --> message_media
+  @OneToMany(() => MessageMedia, (messageMedia) => messageMedia.message)
+  messageMedia: MessageMedia[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

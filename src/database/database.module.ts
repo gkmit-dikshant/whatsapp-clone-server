@@ -5,6 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Chat } from 'src/chats/entities/chat.entity';
 import { ChatUser } from 'src/chats/entities/chat-user.entity';
 import { Message } from 'src/messages/entities/message.entity';
+import { MessageMedia } from 'src/message-media/entities/message-media-entity';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { Message } from 'src/messages/entities/message.entity';
         username: configService.getOrThrow<string>('DB_USERNAME'),
         password: configService.getOrThrow<string>('DB_PASSWORD'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        entities: [User, Chat, ChatUser, Message],
+        entities: [User, Chat, ChatUser, Message, MessageMedia],
         synchronize: configService.getOrThrow<string>('DB_SYNC') === 'true',
       }),
       inject: [ConfigService],
