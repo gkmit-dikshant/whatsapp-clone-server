@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ChatUser } from './chat-user.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Entity('chats')
 export class Chat {
@@ -26,8 +27,13 @@ export class Chat {
   @Column({ name: 'is_group', nullable: false, default: false })
   isGroup: boolean;
 
+  // chat --> chatUser
   @OneToMany(() => ChatUser, (chatUser) => chatUser.chat)
   chatUsers: ChatUser[];
+
+  // chat --> message
+  @OneToMany(() => Message, (message) => message.chat)
+  messages: Message[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -1,12 +1,10 @@
 import { ChatUser } from 'src/chats/entities/chat-user.entity';
-import { Chat } from 'src/chats/entities/chat.entity';
+import { Message } from 'src/messages/entities/message.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -29,8 +27,13 @@ export class User {
   @Column({ name: 'pic_url' })
   picUrl: string;
 
+  // user --> chatUser
   @OneToMany(() => ChatUser, (chatUser) => chatUser.user)
   chatUsers: ChatUser[];
+
+  // user --> message
+  @OneToMany(() => Message, (message) => message.user)
+  messages: Message[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
