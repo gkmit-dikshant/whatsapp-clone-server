@@ -1,8 +1,13 @@
+import { ChatUser } from 'src/chats/entities/chat-user.entity';
+import { Chat } from 'src/chats/entities/chat.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,6 +28,9 @@ export class User {
 
   @Column({ name: 'pic_url' })
   picUrl: string;
+
+  @OneToMany(() => ChatUser, (chatUser) => chatUser.user)
+  chatUsers: ChatUser[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

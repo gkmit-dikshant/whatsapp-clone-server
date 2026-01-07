@@ -3,9 +3,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ChatUser } from './chat-user.entity';
 
 @Entity('chats')
 export class Chat {
@@ -23,6 +25,9 @@ export class Chat {
 
   @Column({ name: 'is_group', nullable: false, default: false })
   isGroup: boolean;
+
+  @OneToMany(() => ChatUser, (chatUser) => chatUser.chat)
+  chatUsers: ChatUser[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
