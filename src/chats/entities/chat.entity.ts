@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { ChatUser } from './chat-user.entity';
 import { Message } from 'src/messages/entities/message.entity';
-import { ChatInvite } from 'src/chat-invites/entities/chat-invites-entity';
+import { ChatInvite } from 'src/chat-invites/entities/chat-invites.entity';
 
 @Entity('chats')
 export class Chat {

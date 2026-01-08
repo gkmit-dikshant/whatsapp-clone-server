@@ -1,4 +1,4 @@
-import { ChatInvite } from 'src/chat-invites/entities/chat-invites-entity';
+import { ChatInvite } from 'src/chat-invites/entities/chat-invites.entity';
 import { ChatUser } from 'src/chats/entities/chat-user.entity';
 import { Message } from 'src/messages/entities/message.entity';
 import {
