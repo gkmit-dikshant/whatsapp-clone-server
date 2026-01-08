@@ -1,5 +1,5 @@
 import { Chat } from 'src/chats/entities/chat.entity';
-import { MessageMedia } from 'src/message-media/entities/message-media-entity';
+import { MessageMedia } from 'src/message-media/entities/message-media.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
