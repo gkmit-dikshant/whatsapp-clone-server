@@ -16,10 +16,10 @@ export class Chat {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   about: string;
 
   @Column({ name: 'pic_url', nullable: true })

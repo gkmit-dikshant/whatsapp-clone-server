@@ -15,7 +15,7 @@ export class ChatUser {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({ name: 'chat_id' })
+  @Column({ name: 'chat_id', type: 'int' })
   chatId: number;
 
   @Column({ name: 'is_admin', default: false })
