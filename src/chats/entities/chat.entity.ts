@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ChatUser } from './chat-user.entity';
 import { Message } from 'src/messages/entities/message.entity';
+import { ChatInvite } from 'src/chat-invites/entities/chat-invites-entity';
 
 @Entity('chats')
 export class Chat {
@@ -34,6 +35,10 @@ export class Chat {
   // chat --> message
   @OneToMany(() => Message, (message) => message.chat)
   messages: Message[];
+
+  // chat --> chat-invite
+  @OneToMany(() => ChatInvite, (chatInvite) => chatInvite.chat)
+  chatInvites: ChatInvite[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

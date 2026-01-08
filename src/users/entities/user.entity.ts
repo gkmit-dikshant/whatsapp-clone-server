@@ -1,3 +1,4 @@
+import { ChatInvite } from 'src/chat-invites/entities/chat-invites-entity';
 import { ChatUser } from 'src/chats/entities/chat-user.entity';
 import { Message } from 'src/messages/entities/message.entity';
 import {
@@ -34,6 +35,12 @@ export class User {
   // user --> message
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
+
+  @OneToMany(() => ChatInvite, (invite) => invite.toUser)
+  receivedInvites: ChatInvite[];
+
+  @OneToMany(() => ChatInvite, (invite) => invite.fromUser)
+  sentInvites: ChatInvite[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
