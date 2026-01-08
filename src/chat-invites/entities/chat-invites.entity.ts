@@ -22,7 +22,7 @@ export class ChatInvite {
   @Column({ name: 'from_user_id', type: 'int' })
   fromUserId: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 1440 }) // 1 day
   expiry: number;
 
   @ManyToOne(() => Chat, (chat) => chat.chatInvites)

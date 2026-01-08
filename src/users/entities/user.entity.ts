@@ -25,7 +25,7 @@ export class User {
   @Column({ type: 'varchar', default: 'Hey, there I m using WhatsApp!' })
   about: string;
 
-  @Column({ name: 'pic_url' })
+  @Column({ name: 'pic_url', nullable: true })
   picUrl: string;
 
   // user --> chatUser
