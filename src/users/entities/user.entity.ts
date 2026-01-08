@@ -28,6 +28,9 @@ export class User {
   @Column({ name: 'pic_url', nullable: true })
   picUrl: string;
 
+  @Column({ name: 'is_verified', default: false })
+  isVerified: boolean;
+
   // user --> chatUser
   @OneToMany(() => ChatUser, (chatUser) => chatUser.user)
   chatUsers: ChatUser[];
