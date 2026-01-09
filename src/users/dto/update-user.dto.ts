@@ -11,7 +11,7 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
-  picUrl: string;
+  picUrl?: string;
 
   @IsBoolean()
   @IsOptional()
