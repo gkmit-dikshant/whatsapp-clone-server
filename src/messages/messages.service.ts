@@ -81,9 +81,19 @@ export class MessagesService {
       skip,
       take: limit,
       order: { createdAt: 'desc' },
+      select: {
+        id: true,
+        content: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    const processed: { send: Message[]; received: Message[] } = {
+    const processed: {
+      send: Message[];
+      received: Message[];
+    } = {
       send: [],
       received: [],
     };

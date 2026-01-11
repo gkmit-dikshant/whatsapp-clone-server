@@ -26,11 +26,12 @@ export class AuthService {
   async register(data: createUserDto) {
     // create user
 
-    const existing = await this.userService.findByEmail(data.email);
-    if (existing) {
+    const existing = await this.userService.findByEmail(data.email, false);
+    if (existing && existing.isVerified) {
       throw new ConflictException('account already exists');
     }
-    const u = await this.userService.create(data);
+    let u = existing;
+    if (!u) u = await this.userService.create(data);
 
     // generate otp
     const otp = await this.generateOtp(u.email);
@@ -101,12 +102,16 @@ export class AuthService {
     };
   }
 
-  async generateOtp(key: string) {
-    // generate otp
+  async generateOtp(key: string): Promise<string> {
     const exp = this.configService.getOrThrow<number>('OTP_EXP');
-    const otp = Math.round(Math.random() * 10000);
-    await this.cacheService.set(key, otp.toString(), exp);
-    return otp.toString();
+
+    const otp = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
+
+    await this.cacheService.set(key, otp, exp);
+
+    return otp;
   }
 
   async createToken(userId: string) {
