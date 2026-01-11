@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -23,16 +24,22 @@ export class ChatInvite {
   @Column({ name: 'from_user_id', type: 'int' })
   fromUserId: number;
 
+  @Column({ type: 'varchar' })
+  token: string;
+
   @Column({ type: 'int', default: 1440 }) // 1 day
   expiry: number;
 
   @ManyToOne(() => Chat, (chat) => chat.chatInvites)
+  @JoinColumn({ name: 'chat_id' })
   chat: Chat;
 
   @ManyToOne(() => User, (user) => user.receivedInvites)
+  @JoinColumn({ name: 'to_user_id' })
   toUser: User;
 
   @ManyToOne(() => User, (user) => user.sentInvites)
+  @JoinColumn({ name: 'from_user_id' })
   fromUser: User;
 
   @Column({ name: 'is_accepted', type: 'boolean', default: false })
@@ -41,6 +48,6 @@ export class ChatInvite {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }
