@@ -26,8 +26,12 @@ export class ChatsService {
       relations: { chat: true },
     });
 
+    const data = chats.map((c) => {
+      return { ...c.chat };
+    });
+
     return {
-      chats,
+      chats: data,
       total,
     };
   }
@@ -48,6 +52,21 @@ export class ChatsService {
       }
       if (members.length !== 1) {
         throw new BadRequestException('one users allowed for personal chat');
+      }
+
+      const existingChat = await this.chatRepo
+        .createQueryBuilder('chat')
+        .innerJoin('chat_users', 'u1', 'u1.chat_id = chat.id')
+        .innerJoin('chat_users', 'u2', 'u2.chat_id = chat.id')
+        .where('chat.is_group = false')
+        .andWhere('u1.user_id = :userId', { userId })
+        .andWhere('u2.user_id = :memberId', {
+          memberId: members[0],
+        })
+        .getOne();
+
+      if (existingChat) {
+        return existingChat;
       }
     }
     // create and save chat
@@ -85,6 +104,7 @@ export class ChatsService {
     return this.chatRepo.findOne({ where: { id } });
   }
 
+  //TODO here when trying to update personal chat detials it shows admin access error
   async update(id: number, data: Partial<CreateChatDto>) {
     await this.chatRepo.update({ id }, data);
     return null;
