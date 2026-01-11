@@ -28,7 +28,7 @@ export class User {
   @Column({ name: 'pic_url', nullable: true })
   picUrl: string;
 
-  @Column({ name: 'is_verified', default: false })
+  @Column({ name: 'is_verified', default: false, select: false })
   isVerified: boolean;
 
   // user --> chatUser
@@ -51,6 +51,6 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz', select: false })
   deletedAt: Date;
 }
