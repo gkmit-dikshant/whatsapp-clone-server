@@ -25,7 +25,7 @@ export class ChatsController {
     return this.chatService.create(+req.user.id, dto);
   }
 
-  @Get('me')
+  @Get('')
   getAllUsersChats(@Req() req, @Query() q) {
     const { page, limit } = q;
     return this.chatService.findUserChats(+req.user.id, +page, +limit);
