@@ -17,7 +17,7 @@ export class Chat {
   id: number;
 
   @Column({ nullable: true, type: 'varchar' })
-  name: string;
+  name?: string;
 
   @Column({ nullable: true, type: 'varchar' })
   about: string;
