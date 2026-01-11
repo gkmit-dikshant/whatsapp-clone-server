@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -28,10 +29,12 @@ export class Message {
 
   // message <-- user
   @ManyToOne(() => User, (user) => user.messages)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   // message <-- chat
   @ManyToOne(() => Chat, (chat) => chat.messages)
+  @JoinColumn({ name: 'chat_id' })
   chat: Chat;
 
   // message --> message_media
