@@ -48,7 +48,7 @@ export class UsersService {
     if (email) {
       searchOption.email = ILike(`%${email}%`);
     }
-    console.log(searchOption);
+
     const [data, total] = await this.userRepo.findAndCount({
       where: searchOption,
       order: { [sort]: orderBy },
