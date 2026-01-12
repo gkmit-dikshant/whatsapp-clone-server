@@ -7,10 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
 import { MediaService } from 'src/media/media.service';
-import {
-  FILE_TYPE,
-  MessageMedia,
-} from 'src/media/entities/message-media.entity';
+import { MessageMedia } from 'src/media/entities/message-media.entity';
 
 @Injectable()
 export class MessagesService {
@@ -39,12 +36,13 @@ export class MessagesService {
     if (files?.length) {
       await Promise.all(
         files.map(async (file) => {
-          const uploaded = await this.mediaService.uploadFile(file);
+          const { file: uploaded, type } =
+            await this.mediaService.uploadFile(file);
 
           await this.messageMediaRepo.save({
             messageId: savedMessage.id,
             url: uploaded.Location,
-            mediaType: 'img',
+            mediaType: type,
           });
         }),
       );

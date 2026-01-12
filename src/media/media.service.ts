@@ -31,7 +31,7 @@ export class MediaService {
     file: Buffer,
     key: string,
     mimetype: string,
-  ): Promise<AWS.S3.ManagedUpload.SendData> {
+  ): Promise<{ file: AWS.S3.ManagedUpload.SendData; type: string }> {
     const params: AWS.S3.PutObjectRequest = {
       Bucket: this.bucketName,
       Key: key,
@@ -40,6 +40,6 @@ export class MediaService {
       ContentDisposition: 'inline',
     };
 
-    return this.s3.upload(params).promise();
+    return { file: await this.s3.upload(params).promise(), type: mimetype };
   }
 }
