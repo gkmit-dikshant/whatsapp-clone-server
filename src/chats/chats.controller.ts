@@ -8,7 +8,9 @@ import {
   Post,
   Query,
   Req,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dto/create-chat-dto';
@@ -16,6 +18,8 @@ import { AccessGuard } from 'src/auth/role.guard';
 import { Access } from 'src/auth/decorators/access.decorators';
 import { ChatAccessLevel } from 'src/enum/chat-access.enum';
 import { MessagesService } from 'src/messages/messages.service';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 
 @Controller('chats')
 export class ChatsController {
@@ -33,6 +37,22 @@ export class ChatsController {
   getAllUsersChats(@Req() req, @Query() q) {
     const { page, limit } = q;
     return this.chatService.findUserChats(+req.user.id, +page, +limit);
+  }
+
+  @UseGuards(AccessGuard)
+  @Access({ chat: ChatAccessLevel.MEMBER })
+  @Post('/:chatId/messages')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'file' }]))
+  sendMessage(
+    @Req() req,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Body() dto: CreateMessageDto,
+    @UploadedFiles()
+    files: {
+      file?: Express.Multer.File[];
+    },
+  ) {
+    return this.messageService.create(req.user.id, chatId, dto, files.file);
   }
 
   @UseGuards(AccessGuard)

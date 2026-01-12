@@ -6,41 +6,14 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post,
   Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { AccessGuard } from 'src/auth/role.guard';
-import { Access } from 'src/auth/decorators/access.decorators';
-import { ChatAccessLevel } from 'src/enum/chat-access.enum';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
 
 @Controller('messages')
 export class MessagesController {
   constructor(private messageService: MessagesService) {}
-
-  @UseGuards(AccessGuard)
-  @Access({ chat: ChatAccessLevel.MEMBER })
-  @Post(':chatId')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'file' }]))
-  create(
-    @Req() req,
-    @Param('chatId', ParseIntPipe) chatId: number,
-    @Body() dto: CreateMessageDto,
-    @UploadedFiles()
-    files: {
-      file?: Express.Multer.File[];
-    },
-  ) {
-    return this.messageService.create(req.user.id, chatId, dto, files.file);
-  }
 
   @Patch(':id')
   async update(
