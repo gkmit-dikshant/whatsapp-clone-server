@@ -4,10 +4,14 @@ import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { createUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { MediaService } from 'src/media/media.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private userRepo: Repository<User>,
+    private mediaService: MediaService,
+  ) {}
   async create(data: createUserDto) {
     const u = await this.userRepo.save(data);
     return u;
@@ -65,7 +69,16 @@ export class UsersService {
     };
   }
 
-  async update(id: number, data: UpdateUserDto) {
+  async update(
+    id: number,
+    data: UpdateUserDto,
+    profilePhoto?: Express.Multer.File,
+  ) {
+    data.picUrl = undefined;
+    if (profilePhoto) {
+      const { file } = await this.mediaService.uploadFile(profilePhoto);
+      data.picUrl = file.Location;
+    }
     await this.userRepo.update({ id }, data);
     return null;
   }

@@ -7,9 +7,12 @@ import {
   Patch,
   Query,
   Request,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
@@ -32,11 +35,13 @@ export class UsersController {
   }
 
   @Patch('/:id')
+  @UseInterceptors(FileInterceptor('profilePhoto'))
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
+    @UploadedFile() profilePhoto: Express.Multer.File,
   ) {
-    await this.userService.update(id, dto);
+    await this.userService.update(id, dto, profilePhoto);
     return {
       message: 'updated successfully',
     };

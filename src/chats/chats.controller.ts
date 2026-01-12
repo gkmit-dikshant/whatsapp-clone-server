@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -18,7 +19,10 @@ import { AccessGuard } from 'src/auth/role.guard';
 import { Access } from 'src/auth/decorators/access.decorators';
 import { ChatAccessLevel } from 'src/enum/chat-access.enum';
 import { MessagesService } from 'src/messages/messages.service';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 
 @Controller('chats')
@@ -64,12 +68,14 @@ export class ChatsController {
 
   @UseGuards(AccessGuard)
   @Access({ chat: ChatAccessLevel.ADMIN })
+  @UseInterceptors(FileInterceptor('chatPhoto'))
   @Patch(':chatId')
   async update(
     @Param('chatId', ParseIntPipe) id: number,
     @Body() dto: Partial<CreateChatDto>,
+    @UploadedFile() chatPhoto: Express.Multer.File,
   ) {
-    await this.chatService.update(id, dto);
+    await this.chatService.update(id, dto, chatPhoto);
     return {
       message: 'updated successfully',
     };
