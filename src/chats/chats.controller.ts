@@ -1,7 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
+  ForbiddenException,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -96,5 +100,39 @@ export class ChatsController {
       page,
       limit,
     );
+  }
+
+  @Access({ chat: ChatAccessLevel.ADMIN })
+  @UseGuards(AccessGuard)
+  @Post(':chatId/admin')
+  @HttpCode(200)
+  async updateAdmin(
+    @Req() req,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Body() dto: { userId: number; isAdmin: boolean },
+  ) {
+    if (dto.userId === req.user.id) {
+      throw new ForbiddenException('operation not allowed');
+    }
+    await this.chatService.updateAdminStatus(chatId, dto.userId, dto.isAdmin);
+    return {
+      message: 'admin status updated',
+    };
+  }
+
+  @Access({ chat: ChatAccessLevel.ADMIN })
+  @UseGuards(AccessGuard)
+  @Delete(':chatId/users/:userId')
+  async removeMember(
+    @Req() req,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Param('userId') userId: number,
+  ) {
+    if (req.user.id === userId) {
+      throw new ForbiddenException('operation not allowed');
+    }
+
+    await this.chatService.removeMember(chatId, userId);
+    return null;
   }
 }

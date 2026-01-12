@@ -197,4 +197,33 @@ export class ChatsService {
     await this.chatRepo.update({ id }, data);
     return null;
   }
+
+  async updateAdminStatus(chatId: number, userId: number, isAdmin: boolean) {
+    const chatUser = await this.chatUserRepo.findOne({
+      where: { chatId, userId },
+    });
+
+    if (!chatUser) {
+      throw new NotFoundException('chat member does not exist');
+    }
+
+    chatUser.isAdmin = isAdmin;
+
+    await this.chatUserRepo.save(chatUser);
+    return null;
+  }
+
+  async removeMember(chatId: number, userId: number) {
+    const chatUser = await this.chatUserRepo.findOne({
+      where: { chatId, userId },
+    });
+
+    if (!chatUser) {
+      throw new NotFoundException();
+    }
+
+    await this.chatUserRepo.softDelete({ userId, chatId });
+
+    return null;
+  }
 }
