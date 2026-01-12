@@ -50,7 +50,7 @@ export class UsersService {
     }
 
     const [data, total] = await this.userRepo.findAndCount({
-      where: searchOption,
+      where: { ...searchOption, isVerified: true },
       order: { [sort]: orderBy },
       skip,
       take: limit,

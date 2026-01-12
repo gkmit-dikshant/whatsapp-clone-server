@@ -42,16 +42,18 @@ export class ChatsService {
     // validation checks
     if (isGroup) {
       if (!name) {
-        throw new BadRequestException('chat group should have name');
+        throw new BadRequestException('group chat should have name');
       }
     } else {
       if (!members) {
         throw new BadRequestException(
-          'atleast two users required for personal',
+          'atleast two users required for personal chat',
         );
       }
       if (members.length !== 1) {
-        throw new BadRequestException('one users allowed for personal chat');
+        throw new BadRequestException(
+          'only one users allowed for personal chat',
+        );
       }
 
       const existingChat = await this.chatRepo
@@ -97,7 +99,15 @@ export class ChatsService {
       ),
     );
 
-    return savedChat;
+    return {
+      id: savedChat.id,
+      name: savedChat.name,
+      about: savedChat.about,
+      picUrl: savedChat.picUrl,
+      isGroup: savedChat.isGroup,
+      createdAt: savedChat.createdAt,
+      updatedAt: savedChat.updatedAt,
+    };
   }
 
   async findById(id: number) {

@@ -78,12 +78,12 @@ export class AuthService {
   async verifyOtp(email: string, otp: string) {
     const cachedOtp = await this.cacheService.get(email);
     if (cachedOtp !== otp) {
-      throw new UnauthorizedException('invalid otp');
+      throw new UnauthorizedException('invalid otp or email');
     }
 
     const u = await this.userService.findByEmail(email, false);
     if (!u) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("user does'nt exists");
     }
     if (!u.isVerified) {
       // update user isVerified
