@@ -31,4 +31,10 @@ export class AuthController {
     const { email, otp } = dto;
     return this.authService.verifyOtp(email, otp);
   }
+
+  @Post('/refresh')
+  @HttpCode(200)
+  getRefreshToken(@Body('refreshToken') refreshToken: string) {
+    return this.authService.generateRefreshToken(refreshToken);
+  }
 }

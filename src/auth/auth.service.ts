@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -129,5 +130,20 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  async generateRefreshToken(refreshToken: string) {
+    try {
+      const payload: { id: string } = await this.jwtService.verifyAsync(
+        refreshToken,
+        {
+          secret: this.configService.getOrThrow<string>('REFRESH_TOKEN_SECRET'),
+        },
+      );
+
+      return await this.createToken(payload.id);
+    } catch (error) {
+      throw new ForbiddenException(error);
+    }
   }
 }
