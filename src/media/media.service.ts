@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as AWS from 'aws-sdk';
 import { v4 as uuid } from 'uuid';
@@ -20,6 +20,9 @@ export class MediaService {
   }
 
   async uploadFile(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('no file is provided');
+    }
     const { buffer, mimetype, originalname } = file;
 
     const fileKey = `uploads/${uuid()}-${originalname}`;

@@ -72,14 +72,12 @@ export class ChatsController {
 
   @UseGuards(AccessGuard)
   @Access({ chat: ChatAccessLevel.ADMIN })
-  @UseInterceptors(FileInterceptor('chatPhoto'))
   @Patch(':chatId')
   async update(
     @Param('chatId', ParseIntPipe) id: number,
     @Body() dto: Partial<CreateChatDto>,
-    @UploadedFile() chatPhoto: Express.Multer.File,
   ) {
-    await this.chatService.update(id, dto, chatPhoto);
+    await this.chatService.update(id, dto);
     return {
       message: 'updated successfully',
     };

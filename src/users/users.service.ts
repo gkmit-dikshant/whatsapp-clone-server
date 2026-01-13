@@ -74,8 +74,8 @@ export class UsersService {
     data: UpdateUserDto,
     profilePhoto?: Express.Multer.File,
   ) {
-    data.picUrl = undefined;
     if (profilePhoto) {
+      data.picUrl = undefined;
       const { file } = await this.mediaService.uploadFile(profilePhoto);
       data.picUrl = file.Location;
     }

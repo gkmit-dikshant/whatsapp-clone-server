@@ -189,8 +189,8 @@ export class ChatsService {
       throw new ForbiddenException('personal chat cant have photo');
     }
 
-    data.picUrl = undefined;
     if (chatPhoto) {
+      data.picUrl = undefined;
       const { file } = await this.mediaService.uploadFile(chatPhoto);
       data.picUrl = file.Location;
     }

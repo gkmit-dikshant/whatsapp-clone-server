@@ -35,13 +35,11 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  @UseInterceptors(FileInterceptor('profilePhoto'))
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
-    @UploadedFile() profilePhoto: Express.Multer.File,
   ) {
-    await this.userService.update(id, dto, profilePhoto);
+    await this.userService.update(id, dto);
     return {
       message: 'updated successfully',
     };
