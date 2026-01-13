@@ -45,7 +45,7 @@ export class ChatInvitesController {
   @Get('accept')
   async updateStatus(@Req() req, @Query('token') token: string) {
     if (!token) {
-      throw new BadRequestException('please provide token');
+      throw new BadRequestException('token is missing!');
     }
 
     await this.chatInviteService.updateStatus(token);

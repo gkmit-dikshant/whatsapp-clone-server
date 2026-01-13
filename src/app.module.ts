@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
-import { MessageMediaModule } from './message-media/message-media.module';
+import { MediaModule } from './media/media.module';
 import { ChatInvitesModule } from './chat-invites/chat-invites.module';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -23,7 +23,7 @@ import { JwtModule } from '@nestjs/jwt';
     UsersModule,
     ChatsModule,
     MessagesModule,
-    MessageMediaModule,
+    MediaModule,
     ChatInvitesModule,
     AuthModule,
     CacheModule.register({

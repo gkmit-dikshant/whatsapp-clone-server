@@ -4,6 +4,7 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import { Public } from 'src/auth/auth.guard';
 
 @Controller('health')
 export class HealthController {
@@ -12,12 +13,13 @@ export class HealthController {
     private db: TypeOrmHealthIndicator,
   ) {}
   @Get()
+  @Public()
   @HealthCheck()
   async check() {
     const d = await this.db.pingCheck('database');
     return {
       currtime: Date(),
-      db: d,
+      db: d.database.status,
     };
   }
 }

@@ -6,24 +6,64 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
+import { MediaService } from 'src/media/media.service';
+import { MessageMedia } from 'src/media/entities/message-media.entity';
 
 @Injectable()
 export class MessagesService {
   constructor(
     @InjectRepository(Message) private messageRepo: Repository<Message>,
+    @InjectRepository(MessageMedia)
+    private messageMediaRepo: Repository<MessageMedia>,
+    private mediaService: MediaService,
   ) {}
   async create(
     userId: number,
     chatId: number,
     data: { content: string; media?: string[] },
+    files?: Express.Multer.File[],
   ) {
-    const { content, media } = data;
+    const { content } = data;
+
     const message = this.messageRepo.create({
       userId,
       chatId,
       content,
     });
-    return this.messageRepo.save(message);
+
+    const savedMessage = await this.messageRepo.save(message);
+
+    if (files?.length) {
+      await Promise.all(
+        files.map(async (file) => {
+          const { file: uploaded, type } =
+            await this.mediaService.uploadFile(file);
+
+          await this.messageMediaRepo.save({
+            messageId: savedMessage.id,
+            url: uploaded.Location,
+            mediaType: type,
+          });
+        }),
+      );
+    }
+
+    const result = await this.messageRepo.findOne({
+      where: { id: savedMessage.id },
+      relations: {
+        messageMedia: true,
+      },
+      select: {
+        messageMedia: {
+          id: true,
+          url: true,
+          mediaType: true,
+          createdAt: true,
+        },
+      },
+    });
+
+    return result;
   }
 
   async update(userId: number, id: number, content: string) {
@@ -81,12 +121,19 @@ export class MessagesService {
       skip,
       take: limit,
       order: { createdAt: 'desc' },
+      relations: { messageMedia: true },
       select: {
         id: true,
         content: true,
         userId: true,
         createdAt: true,
         updatedAt: true,
+        messageMedia: {
+          id: true,
+          url: true,
+          mediaType: true,
+          createdAt: true,
+        },
       },
     });
 

@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -19,7 +20,7 @@ export class MessageMedia {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', name: 'message_id' })
   messageId: number;
 
   @Column({ type: 'varchar' })
@@ -27,10 +28,11 @@ export class MessageMedia {
 
   // message_media <-- message
   @ManyToOne(() => Message, (message) => message.messageMedia)
+  @JoinColumn({ name: 'message_id' })
   message: Message;
 
-  @Column({ name: 'media_type', type: 'enum', enum: FILE_TYPE })
-  mediaType: FILE_TYPE;
+  @Column({ name: 'media_type', nullable: true })
+  mediaType: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
