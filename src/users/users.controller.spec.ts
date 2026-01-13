@@ -107,17 +107,14 @@ describe('UsersController', () => {
     it('should update user and return success message', async () => {
       const dto: UpdateUserDto = {
         name: 'Updated Name',
+        picUrl: 'https://pic.com',
       } as UpdateUserDto;
-
-      const file = {
-        originalname: 'photo.png',
-      } as Express.Multer.File;
 
       mockUsersService.update.mockResolvedValue(undefined);
 
-      const result = await controller.update(1, dto, file);
+      const result = await controller.update(1, dto);
 
-      expect(service.update).toHaveBeenCalledWith(1, dto, file);
+      expect(service.update).toHaveBeenCalledWith(1, dto);
       expect(result).toEqual({
         message: 'updated successfully',
       });
@@ -130,9 +127,9 @@ describe('UsersController', () => {
 
       mockUsersService.update.mockResolvedValue(undefined);
 
-      const result = await controller.update(1, dto, undefined);
+      const result = await controller.update(1, dto);
 
-      expect(service.update).toHaveBeenCalledWith(1, dto, undefined);
+      expect(service.update).toHaveBeenCalledWith(1, dto);
       expect(result.message).toBe('updated successfully');
     });
   });

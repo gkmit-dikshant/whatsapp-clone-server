@@ -153,13 +153,12 @@ describe('ChatsController', () => {
   describe('update', () => {
     it('should update chat and return success message', async () => {
       const dto = { name: 'Updated Chat' };
-      const file = { originalname: 'chat.png' } as Express.Multer.File;
 
       chatService.update.mockResolvedValue(undefined);
 
-      const result = await controller.update(1, dto, file);
+      const result = await controller.update(1, dto);
 
-      expect(chatService.update).toHaveBeenCalledWith(1, dto, file);
+      expect(chatService.update).toHaveBeenCalledWith(1, dto);
       expect(result).toEqual({ message: 'updated successfully' });
     });
   });
