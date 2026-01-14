@@ -114,8 +114,12 @@ export class ChatsController {
   }
 
   @Post(':chatId/leave')
-  leaveChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
-    return this.chatService.leaveChat(+req.user.id, chatId);
+  @HttpCode(200)
+  async leaveChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
+    await this.chatService.leaveChat(+req.user.id, chatId);
+    return {
+      message: 'left chat successfully',
+    };
   }
 
   @Access({ chat: ChatAccessLevel.ADMIN })

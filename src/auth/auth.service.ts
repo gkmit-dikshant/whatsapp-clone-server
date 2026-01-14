@@ -31,16 +31,16 @@ export class AuthService {
     if (existing && existing.isVerified) {
       throw new ConflictException('account already exists');
     }
-    let u = existing;
-    if (!u) u = await this.userService.create(data);
+    let user = existing;
+    if (!user) user = await this.userService.create(data);
 
     // generate otp
-    const otp = await this.generateOtp(u.email);
+    const otp = await this.generateOtp(user.email);
 
     // send otp
     this.mailService
       .sendMail({
-        to: u.email,
+        to: user.email,
         from: this.configService.getOrThrow<string>('OTP_SENDER_EMAIL'),
         text: otp,
         subject: 'register otp',
@@ -78,24 +78,22 @@ export class AuthService {
 
   async verifyOtp(email: string, otp: string) {
     const cachedOtp = await this.cacheService.get(email);
-    console.log(cachedOtp);
+
     if (cachedOtp !== otp) {
       throw new UnauthorizedException('invalid otp or email');
     }
-    const u = await this.userService.findByEmail(email, false);
-    if (!u) {
+    const user = await this.userService.findByEmail(email, false);
+    if (!user) {
       throw new UnauthorizedException("user does'nt exists");
     }
-    if (!u.isVerified) {
+    if (!user.isVerified) {
       // update user isVerified
-      await this.userService.update(u.id, {
+      await this.userService.update(user.id, {
         isVerified: true,
       } as UpdateUserDto);
     }
     // create token
-    const { accessToken, refreshToken } = await this.createToken(
-      u.id.toString(),
-    );
+    const { accessToken, refreshToken } = await this.createToken(user.id);
     // send token
     return {
       accessToken,
@@ -115,7 +113,7 @@ export class AuthService {
     return otp;
   }
 
-  async createToken(userId: string) {
+  async createToken(userId: number) {
     const payload = { id: userId };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -134,7 +132,7 @@ export class AuthService {
 
   async generateRefreshToken(refreshToken: string) {
     try {
-      const payload: { id: string } = await this.jwtService.verifyAsync(
+      const payload: { id: number } = await this.jwtService.verifyAsync(
         refreshToken,
         {
           secret: this.configService.getOrThrow<string>('REFRESH_TOKEN_SECRET'),
