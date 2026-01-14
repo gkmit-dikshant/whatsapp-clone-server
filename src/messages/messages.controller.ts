@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { type AuthRequest } from 'src/types/auth-request';
 
 @Controller('messages')
 export class MessagesController {
@@ -17,7 +18,7 @@ export class MessagesController {
 
   @Patch(':id')
   async update(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateMessageDto,
   ) {
@@ -29,7 +30,7 @@ export class MessagesController {
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Req() req, @Param('id', ParseIntPipe) id: number) {
+  async delete(@Req() req: AuthRequest, @Param('id', ParseIntPipe) id: number) {
     await this.messageService.delete(req.user.id, id);
     return null;
   }

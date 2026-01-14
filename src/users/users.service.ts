@@ -13,8 +13,8 @@ export class UsersService {
     private mediaService: MediaService,
   ) {}
   async create(data: createUserDto) {
-    const u = await this.userRepo.save(data);
-    return u;
+    const user = await this.userRepo.save(data);
+    return user;
   }
 
   async findById(id: number) {
@@ -27,13 +27,13 @@ export class UsersService {
     if (isVerified) {
       searchOption.isVerified = true;
     }
-    const u = await this.userRepo.findOne({ where: searchOption });
-    return u;
+    const user = await this.userRepo.findOne({ where: searchOption });
+    return user;
   }
 
   async findAll(
-    email: string,
-    name: string,
+    email: string | undefined,
+    name: string | undefined,
     page: number = 1,
     limit: number = 10,
     sort: string = 'name',

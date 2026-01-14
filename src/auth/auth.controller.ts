@@ -32,6 +32,7 @@ export class AuthController {
     return this.authService.verifyOtp(email, otp);
   }
 
+  @Public()
   @Post('/refresh')
   @HttpCode(200)
   getRefreshToken(@Body('refreshToken') refreshToken: string) {

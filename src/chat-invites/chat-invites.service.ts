@@ -27,19 +27,19 @@ export class ChatInvitesService {
     data: { sendTo: string; expiry?: number },
   ) {
     const { sendTo, expiry } = data;
-    const u = await this.userRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { email: sendTo },
       select: ['id', 'email'],
     });
 
-    if (!u) {
+    if (!user) {
       throw new BadRequestException(`user with email ${sendTo} does'nt exist`);
     }
 
     const existingInvite = await this.chatInviteRepo.findOne({
       where: {
         chatId,
-        toUserId: u.id,
+        toUserId: user.id,
         isAccepted: false,
       },
     });
@@ -53,7 +53,7 @@ export class ChatInvitesService {
 
     const invite = this.chatInviteRepo.create({
       chatId,
-      toUserId: u.id,
+      toUserId: user.id,
       fromUserId,
       expiry,
       token,
@@ -63,7 +63,7 @@ export class ChatInvitesService {
     const acceptUrl = `http://localhost:${process.env.SERVER_PORT}/chat-invites/accept?token=${rawToken}`;
     this.mailService
       .sendMail({
-        to: u.email,
+        to: user.email,
         subject: 'Chat invitation',
         html: `
       <p>You have been invited to join a chat.</p>
@@ -94,7 +94,7 @@ export class ChatInvitesService {
     });
 
     if (!invite) {
-      throw new NotFoundException();
+      throw new NotFoundException('no invite exists with given token');
     }
 
     const remainTime =

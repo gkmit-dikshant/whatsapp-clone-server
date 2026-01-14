@@ -6,12 +6,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatUser } from './entities/chat-user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Chat } from './entities/chat.entity';
 import { CreateChatDto } from './dto/create-chat-dto';
 import { MediaService } from 'src/media/media.service';
 import { ChatInvitesService } from 'src/chat-invites/chat-invites.service';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Injectable()
 export class ChatsService {
@@ -19,6 +20,7 @@ export class ChatsService {
     @InjectRepository(ChatUser) private chatUserRepo: Repository<ChatUser>,
     @InjectRepository(Chat) private chatRepo: Repository<Chat>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Message) private messageRepo: Repository<Message>,
     private chatInviteService: ChatInvitesService,
     private mediaService: MediaService,
   ) {}
@@ -30,13 +32,37 @@ export class ChatsService {
     const skip = (page - 1) * limit;
     const [chats, total] = await this.chatUserRepo.findAndCount({
       where: { userId },
+      order: {
+        updatedAt: 'DESC',
+      },
       skip,
       take: limit,
       relations: { chat: true },
     });
 
+    const PersonalchatIds = chats.map((c) => {
+      if (!c.chat.isGroup) {
+        return c.chat.id;
+      }
+    });
+
+    const personalChatUser = await this.chatUserRepo.find({
+      where: { chatId: In(PersonalchatIds) },
+      relations: {
+        user: true,
+      },
+    });
+
     const data = chats.map((c) => {
-      return { ...c.chat };
+      if (c.chat.isGroup) {
+        return { ...c.chat };
+      } else {
+        const anotherUser = personalChatUser.filter(
+          (el) => el.chatId === c.chat.id && el.user.id !== userId,
+        );
+        c.chat.name = anotherUser[0].user.name;
+        return { ...c.chat };
+      }
     });
 
     return {
@@ -154,7 +180,7 @@ export class ChatsService {
     });
 
     if (!chat) {
-      throw new NotFoundException();
+      throw new NotFoundException(`chat with id ${id} does'nt exists`);
     }
 
     const members = chat?.chatUsers.map((chat_user) => {
@@ -178,7 +204,7 @@ export class ChatsService {
     const existing = await this.chatRepo.findOne({ where: { id } });
 
     if (!existing) {
-      throw new NotFoundException();
+      throw new NotFoundException(`chat with id ${id} does'nt exists`);
     }
 
     if (data.isGroup) {
@@ -219,10 +245,64 @@ export class ChatsService {
     });
 
     if (!chatUser) {
-      throw new NotFoundException();
+      throw new NotFoundException(
+        `user with id ${userId} is not part of chat with id ${chatId}`,
+      );
     }
 
     await this.chatUserRepo.softDelete({ userId, chatId });
+
+    return null;
+  }
+
+  async delete(userId: number, chatId: number) {
+    if (!chatId) {
+      throw new BadRequestException('invalid chatId');
+    }
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) {
+      throw new NotFoundException(`chat with id ${chatId} doesnt exists`);
+    }
+    await this.chatUserRepo.update(
+      { userId, chatId },
+      {
+        createdAt: () => 'CURRENT_TIMESTAMP',
+      },
+    );
+    return null;
+  }
+
+  async leaveChat(userId: number, chatId: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      select: { id: true, isGroup: true },
+    });
+
+    if (chat && !chat.isGroup) {
+      throw new BadRequestException(
+        'leaving chat is not allowed for personal chat',
+      );
+    }
+
+    await this.chatUserRepo.softDelete({ chatId, userId });
+
+    const admins = await this.chatUserRepo.findOne({
+      where: { chatId, userId, isAdmin: true },
+      select: { id: true },
+    });
+
+    if (!admins) {
+      // find oldest member
+      const newAdmin = await this.chatUserRepo.findOne({
+        where: { chatId, userId },
+        select: { id: true },
+        order: { createdAt: 'ASC' },
+      });
+
+      if (newAdmin) {
+        await this.chatUserRepo.update({ id: newAdmin.id }, { isAdmin: true });
+      }
+    }
 
     return null;
   }

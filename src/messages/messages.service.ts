@@ -1,13 +1,14 @@
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { MediaService } from 'src/media/media.service';
 import { MessageMedia } from 'src/media/entities/message-media.entity';
+import { ChatUser } from 'src/chats/entities/chat-user.entity';
 
 @Injectable()
 export class MessagesService {
@@ -15,6 +16,7 @@ export class MessagesService {
     @InjectRepository(Message) private messageRepo: Repository<Message>,
     @InjectRepository(MessageMedia)
     private messageMediaRepo: Repository<MessageMedia>,
+    @InjectRepository(ChatUser) private chatUserRepo: Repository<ChatUser>,
     private mediaService: MediaService,
   ) {}
   async create(
@@ -31,7 +33,14 @@ export class MessagesService {
       content,
     });
 
+    // save the message
     const savedMessage = await this.messageRepo.save(message);
+
+    // update the chats updated_at for all members
+    await this.chatUserRepo.update(
+      { chatId },
+      { updatedAt: () => 'CURRENT_TIMESTAMP' },
+    );
 
     if (files?.length) {
       await Promise.all(
@@ -67,19 +76,19 @@ export class MessagesService {
   }
 
   async update(userId: number, id: number, content: string) {
-    const c = await this.messageRepo.findOne({ where: { id, userId } });
-    if (!c) {
-      throw new NotFoundException();
+    const message = await this.messageRepo.findOne({ where: { id, userId } });
+    if (!message) {
+      throw new NotFoundException(`no message found with id ${id}`);
     }
 
     const lastMessage = await this.messageRepo.find({
-      where: { chatId: c.chatId, userId },
+      where: { chatId: message.chatId, userId },
       order: { createdAt: 'DESC' },
       take: 1,
     });
 
     if (lastMessage[0].id !== id) {
-      throw new ForbiddenException('you can only update last sent message');
+      throw new BadRequestException('you can only update last sent message');
     }
 
     await this.messageRepo.update({ id }, { content });
@@ -87,18 +96,18 @@ export class MessagesService {
   }
 
   async delete(userId: number, id: number) {
-    const c = await this.messageRepo.findOne({ where: { id, userId } });
-    if (!c) {
-      throw new NotFoundException();
+    const message = await this.messageRepo.findOne({ where: { id, userId } });
+    if (!message) {
+      throw new NotFoundException(`no message found with id ${id}`);
     }
     const lastMessage = await this.messageRepo.find({
-      where: { chatId: c.chatId, userId },
+      where: { chatId: message.chatId, userId },
       order: { createdAt: 'DESC' },
       take: 1,
     });
 
     if (lastMessage[0].id !== id) {
-      throw new ForbiddenException('you can only delete last sent message');
+      throw new BadRequestException('you can only delete last sent message');
     }
 
     await this.messageRepo.softDelete({ id });
@@ -115,17 +124,28 @@ export class MessagesService {
     if (!page && page <= 0) page = 1;
     if (!limit && limit <= 0) limit = 10;
 
+    const chatUser = await this.chatUserRepo.findOne({
+      where: { userId, chatId },
+      select: { id: true, createdAt: true },
+    });
+
+    if (!chatUser) {
+      throw new NotFoundException(
+        `no chat found with id ${chatId} in you chats`,
+      );
+    }
+
     const skip = (page - 1) * limit;
     const [messages, total] = await this.messageRepo.findAndCount({
-      where: { chatId },
+      where: { chatId, createdAt: MoreThan(chatUser.createdAt) },
       skip,
       take: limit,
       order: { createdAt: 'desc' },
-      relations: { messageMedia: true },
+      relations: { messageMedia: true, user: true },
       select: {
         id: true,
-        content: true,
         userId: true,
+        content: true,
         createdAt: true,
         updatedAt: true,
         messageMedia: {
@@ -137,25 +157,33 @@ export class MessagesService {
       },
     });
 
-    const processed: {
-      send: Message[];
-      received: Message[];
-    } = {
-      send: [],
-      received: [],
-    };
+    const processed: any[] = [];
 
     messages.forEach((msg: Message) => {
       if (msg.userId === userId) {
-        processed.send.push(msg);
+        processed.push({
+          id: msg.id,
+          content: msg.content,
+          media: msg.messageMedia,
+          user: { id: msg.user.id, name: msg.user.name },
+          isLeft: false,
+        });
       } else {
-        processed.received.push(msg);
+        processed.push({
+          id: msg.id,
+          content: msg.content,
+          media: msg.messageMedia,
+          user: { id: msg.user.id, name: msg.user.name },
+          isLeft: true,
+        });
       }
     });
 
     return {
       messages: processed,
-      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }
