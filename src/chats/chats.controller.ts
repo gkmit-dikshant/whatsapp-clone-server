@@ -113,6 +113,11 @@ export class ChatsController {
     };
   }
 
+  @Post(':chatId/leave')
+  leaveChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
+    return this.chatService.leaveChat(+req.user.id, chatId);
+  }
+
   @Access({ chat: ChatAccessLevel.ADMIN })
   @UseGuards(AccessGuard)
   @Delete(':chatId/users/:userId')

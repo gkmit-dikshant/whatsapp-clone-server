@@ -269,4 +269,37 @@ export class ChatsService {
     );
     return null;
   }
+
+  async leaveChat(userId: number, chatId: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      select: { id: true, isGroup: true },
+    });
+
+    if (chat && !chat.isGroup) {
+      throw new BadRequestException('method not allowed for personal chat');
+    }
+
+    await this.chatUserRepo.softDelete({ chatId, userId });
+
+    const admins = await this.chatUserRepo.findOne({
+      where: { chatId, userId, isAdmin: true },
+      select: { id: true },
+    });
+
+    if (!admins) {
+      // find oldest member
+      const newAdmin = await this.chatUserRepo.findOne({
+        where: { chatId, userId },
+        select: { id: true },
+        order: { createdAt: 'ASC' },
+      });
+
+      if (newAdmin) {
+        await this.chatUserRepo.update({ id: newAdmin.id }, { isAdmin: true });
+      }
+    }
+
+    return null;
+  }
 }
