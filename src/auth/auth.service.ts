@@ -77,10 +77,10 @@ export class AuthService {
 
   async verifyOtp(email: string, otp: string) {
     const cachedOtp = await this.cacheService.get(email);
+    console.log(cachedOtp);
     if (cachedOtp !== otp) {
       throw new UnauthorizedException('invalid otp or email');
     }
-
     const u = await this.userService.findByEmail(email, false);
     if (!u) {
       throw new UnauthorizedException("user does'nt exists");
@@ -109,7 +109,7 @@ export class AuthService {
       .toString()
       .padStart(4, '0');
 
-    await this.cacheService.set(key, otp, exp);
+    await this.cacheService.set(key, otp, +exp);
 
     return otp;
   }
