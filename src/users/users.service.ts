@@ -32,8 +32,8 @@ export class UsersService {
   }
 
   async findAll(
-    email: string,
-    name: string,
+    email: string | undefined,
+    name: string | undefined,
     page: number = 1,
     limit: number = 10,
     sort: string = 'name',

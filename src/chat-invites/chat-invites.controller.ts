@@ -16,6 +16,7 @@ import { ChatAccessLevel } from 'src/enum/chat-access.enum';
 import { CreateChatInviteDto } from './dto/create-chat-invite.dto';
 import { ChatInvitesService } from './chat-invites.service';
 import { Public } from 'src/auth/auth.guard';
+import { type AuthRequest } from 'src/types/auth-request';
 
 @Controller('chat-invites')
 export class ChatInvitesController {
@@ -25,7 +26,7 @@ export class ChatInvitesController {
   @Access({ chat: ChatAccessLevel.ADMIN })
   @Post('chats/:chatId')
   async create(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('chatId', ParseIntPipe) chatId: number,
     @Body() dto: CreateChatInviteDto,
   ) {
@@ -42,7 +43,7 @@ export class ChatInvitesController {
 
   @Public()
   @Get('accept')
-  async updateStatus(@Req() req, @Query('token') token: string) {
+  async updateStatus(@Req() req: AuthRequest, @Query('token') token: string) {
     if (!token) {
       throw new BadRequestException('token is missing!');
     }

@@ -23,6 +23,8 @@ import { ChatAccessLevel } from 'src/enum/chat-access.enum';
 import { MessagesService } from 'src/messages/messages.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { type AuthRequest } from 'src/types/auth-request';
 
 @Controller('chats')
 export class ChatsController {
@@ -32,13 +34,13 @@ export class ChatsController {
   ) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreateChatDto) {
+  create(@Req() req: AuthRequest, @Body() dto: CreateChatDto) {
     return this.chatService.create(+req.user.id, dto);
   }
 
   @Get('')
-  getAllUsersChats(@Req() req, @Query() q) {
-    const { page, limit } = q;
+  getAllUsersChats(@Req() req: AuthRequest, @Query() query: PaginationDto) {
+    const { page, limit } = query;
     return this.chatService.findUserChats(+req.user.id, +page, +limit);
   }
 
@@ -47,7 +49,7 @@ export class ChatsController {
   @Post('/:chatId/messages')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'file' }]))
   sendMessage(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('chatId', ParseIntPipe) chatId: number,
     @Body() dto: CreateMessageDto,
     @UploadedFiles()
@@ -82,11 +84,11 @@ export class ChatsController {
   @Access({ chat: ChatAccessLevel.MEMBER })
   @Get(':chatId/messages')
   async getAllMessage(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('chatId', ParseIntPipe) chatId: number,
-    @Query() q,
+    @Query() query: PaginationDto,
   ) {
-    const { page, limit } = q;
+    const { page, limit } = query;
     return this.messageService.getAllMessageOfChat(
       req.user.id,
       chatId,
@@ -100,7 +102,7 @@ export class ChatsController {
   @Post(':chatId/admin')
   @HttpCode(200)
   async updateAdmin(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('chatId', ParseIntPipe) chatId: number,
     @Body() dto: { userId: number; isAdmin: boolean },
   ) {
@@ -115,7 +117,10 @@ export class ChatsController {
 
   @Post(':chatId/leave')
   @HttpCode(200)
-  async leaveChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
+  async leaveChat(
+    @Req() req: AuthRequest,
+    @Param('chatId', ParseIntPipe) chatId: number,
+  ) {
     await this.chatService.leaveChat(+req.user.id, chatId);
     return {
       message: 'left chat successfully',
@@ -126,7 +131,7 @@ export class ChatsController {
   @UseGuards(AccessGuard)
   @Delete(':chatId/users/:userId')
   async removeMember(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Param('chatId', ParseIntPipe) chatId: number,
     @Param('userId') userId: number,
   ) {
@@ -141,7 +146,10 @@ export class ChatsController {
   @Access({ chat: ChatAccessLevel.MEMBER })
   @UseGuards(AccessGuard)
   @Delete(':chatId')
-  async deleteChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
+  async deleteChat(
+    @Req() req: AuthRequest,
+    @Param('chatId', ParseIntPipe) chatId: number,
+  ) {
     await this.chatService.delete(req.user.id, chatId);
     return {
       message: 'successfully deleted chat',

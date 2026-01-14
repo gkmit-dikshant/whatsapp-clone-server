@@ -10,19 +10,21 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { type AuthRequest } from 'src/types/auth-request';
 
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get('')
-  getAll(@Query() q) {
-    const { name, email, page, limit, sort, order } = q;
+  getAll(@Query() query: PaginationDto & { name?: string; email?: string }) {
+    const { name, email, page, limit, sort, order } = query;
     return this.userService.findAll(email, name, +page, +limit, sort, +order);
   }
 
   @Get('/me')
-  getMe(@Request() req) {
+  getMe(@Request() req: AuthRequest) {
     return this.userService.findById(+req.user.id);
   }
 
