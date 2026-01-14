@@ -5,14 +5,12 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
   Req,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -23,10 +21,7 @@ import { AccessGuard } from 'src/auth/role.guard';
 import { Access } from 'src/auth/decorators/access.decorators';
 import { ChatAccessLevel } from 'src/enum/chat-access.enum';
 import { MessagesService } from 'src/messages/messages.service';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 
 @Controller('chats')
@@ -132,5 +127,15 @@ export class ChatsController {
 
     await this.chatService.removeMember(chatId, userId);
     return null;
+  }
+
+  @Access({ chat: ChatAccessLevel.MEMBER })
+  @UseGuards(AccessGuard)
+  @Delete(':chatId')
+  async deleteChat(@Req() req, @Param('chatId', ParseIntPipe) chatId: number) {
+    await this.chatService.delete(req.user.id, chatId);
+    return {
+      message: 'successfully deleted chat',
+    };
   }
 }
