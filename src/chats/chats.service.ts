@@ -180,7 +180,7 @@ export class ChatsService {
     });
 
     if (!chat) {
-      throw new NotFoundException();
+      throw new NotFoundException(`chat with id ${id} does'nt exists`);
     }
 
     const members = chat?.chatUsers.map((chat_user) => {
@@ -204,7 +204,7 @@ export class ChatsService {
     const existing = await this.chatRepo.findOne({ where: { id } });
 
     if (!existing) {
-      throw new NotFoundException();
+      throw new NotFoundException(`chat with id ${id} does'nt exists`);
     }
 
     if (data.isGroup) {
@@ -245,7 +245,9 @@ export class ChatsService {
     });
 
     if (!chatUser) {
-      throw new NotFoundException();
+      throw new NotFoundException(
+        `user with id ${userId} is not part of chat with id ${chatId}`,
+      );
     }
 
     await this.chatUserRepo.softDelete({ userId, chatId });
@@ -259,7 +261,7 @@ export class ChatsService {
     }
     const chat = await this.chatRepo.findOne({ where: { id: chatId } });
     if (!chat) {
-      throw new BadRequestException();
+      throw new NotFoundException(`chat with id ${chatId} doesnt exists`);
     }
     await this.chatUserRepo.update(
       { userId, chatId },
@@ -277,7 +279,9 @@ export class ChatsService {
     });
 
     if (chat && !chat.isGroup) {
-      throw new BadRequestException('method not allowed for personal chat');
+      throw new BadRequestException(
+        'leaving chat is not allowed for personal chat',
+      );
     }
 
     await this.chatUserRepo.softDelete({ chatId, userId });

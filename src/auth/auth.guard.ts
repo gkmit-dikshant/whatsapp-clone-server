@@ -35,7 +35,7 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access credientials are not present');
     }
 
     try {
@@ -46,12 +46,12 @@ export class AuthGuard implements CanActivate {
       const user = await this.userService.findById(payload.id);
 
       if (!user) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException('user no longer exists');
       }
 
       request['user'] = { id: user.id, email: user.email };
-    } catch (error) {
-      throw new UnauthorizedException(error);
+    } catch (error: any) {
+      throw new UnauthorizedException(error.message);
     }
     return true;
   }

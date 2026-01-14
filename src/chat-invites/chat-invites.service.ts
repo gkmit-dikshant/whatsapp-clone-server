@@ -94,7 +94,7 @@ export class ChatInvitesService {
     });
 
     if (!invite) {
-      throw new NotFoundException();
+      throw new NotFoundException('no invite exists with given token');
     }
 
     const remainTime =

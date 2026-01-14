@@ -1,5 +1,5 @@
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -78,7 +78,7 @@ export class MessagesService {
   async update(userId: number, id: number, content: string) {
     const message = await this.messageRepo.findOne({ where: { id, userId } });
     if (!message) {
-      throw new NotFoundException();
+      throw new NotFoundException(`no message found with id ${id}`);
     }
 
     const lastMessage = await this.messageRepo.find({
@@ -88,7 +88,7 @@ export class MessagesService {
     });
 
     if (lastMessage[0].id !== id) {
-      throw new ForbiddenException('you can only update last sent message');
+      throw new BadRequestException('you can only update last sent message');
     }
 
     await this.messageRepo.update({ id }, { content });
@@ -98,7 +98,7 @@ export class MessagesService {
   async delete(userId: number, id: number) {
     const message = await this.messageRepo.findOne({ where: { id, userId } });
     if (!message) {
-      throw new NotFoundException();
+      throw new NotFoundException(`no message found with id ${id}`);
     }
     const lastMessage = await this.messageRepo.find({
       where: { chatId: message.chatId, userId },
@@ -107,7 +107,7 @@ export class MessagesService {
     });
 
     if (lastMessage[0].id !== id) {
-      throw new ForbiddenException('you can only delete last sent message');
+      throw new BadRequestException('you can only delete last sent message');
     }
 
     await this.messageRepo.softDelete({ id });
@@ -130,7 +130,9 @@ export class MessagesService {
     });
 
     if (!chatUser) {
-      throw new NotFoundException();
+      throw new NotFoundException(
+        `no chat found with id ${chatId} in you chats`,
+      );
     }
 
     const skip = (page - 1) * limit;

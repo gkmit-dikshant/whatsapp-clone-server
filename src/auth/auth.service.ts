@@ -57,7 +57,7 @@ export class AuthService {
     // find user
     const user = await this.userService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('user no longer exists');
     }
 
     const otp = await this.generateOtp(user.email);
@@ -141,7 +141,7 @@ export class AuthService {
 
       return await this.createToken(payload.id);
     } catch (error) {
-      throw new ForbiddenException(error);
+      throw new ForbiddenException(error.message);
     }
   }
 }

@@ -1,8 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   Param,
@@ -106,8 +106,8 @@ export class ChatsController {
     @Param('chatId', ParseIntPipe) chatId: number,
     @Body() dto: { userId: number; isAdmin: boolean },
   ) {
-    if (dto.userId === req.user.id) {
-      throw new ForbiddenException('operation not allowed');
+    if (dto.userId === req.user.id && dto.isAdmin) {
+      throw new BadRequestException('you can already admin');
     }
     await this.chatService.updateAdminStatus(chatId, dto.userId, dto.isAdmin);
     return {
@@ -136,7 +136,9 @@ export class ChatsController {
     @Param('userId') userId: number,
   ) {
     if (req.user.id === userId) {
-      throw new ForbiddenException('operation not allowed');
+      throw new BadRequestException(
+        'you cant remove yourself, instead leave the group',
+      );
     }
 
     await this.chatService.removeMember(chatId, userId);
